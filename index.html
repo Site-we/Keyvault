@@ -357,14 +357,33 @@ async function viewKey(productId) {
         alert("Could not load product key file.");
     }
 }
+        function copyKey() {
+    const keyText = document.getElementById("productKey").innerText;
+
+    navigator.clipboard.writeText(keyText)
+        .then(() => {
+            const status = document.getElementById("copyStatus");
+            status.style.display = "block";
+
+            setTimeout(() => {
+                status.style.display = "none";
+            }, 2000);
+        })
+        .catch(() => {
+            alert("Copy failed. Use HTTPS or localhost.");
+        });
+        }
+        
 function closeModal() {
     document.getElementById("keyModal").style.display = "none";
+    document.getElementById("copyStatus").style.display = "none";
 }
+
 
 init();
 
     </script>
-    <!-- Product Key Modal -->
+<!-- Product Key Modal -->
 <div id="keyModal" style="
 display:none;
 position:fixed;
@@ -383,7 +402,6 @@ z-index:2000;
     border-radius:12px;
     text-align:center;
     position:relative;
-    animation:fadeIn 0.3s ease;
     ">
 
         <h3 style="margin-bottom:15px;">Your Product Key</h3>
@@ -396,14 +414,25 @@ z-index:2000;
             border-radius:6px;
             font-weight:bold;
             letter-spacing:1px;
+            margin-bottom:10px;
         "></div>
 
+        <button onclick="copyKey()" class="btn btn-dl" style="width:100%;">
+            Copy to Clipboard
+        </button>
+
+        <div id="copyStatus" style="
+            font-size:0.9rem;
+            margin-top:8px;
+            color:green;
+            display:none;
+        ">Copied ✓</div>
+
         <button onclick="closeModal()" class="btn btn-buy"
-            style="margin-top:20px;width:100%;">
+            style="margin-top:15px;width:100%;">
             Close
         </button>
     </div>
-</div>
-    
+</div>    
 </body>
 </html>
