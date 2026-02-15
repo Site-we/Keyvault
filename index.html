@@ -28,6 +28,7 @@
 
         .logo { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
 
+        /* Restored Tab System */
         .tabs-container {
             display: flex;
             justify-content: center;
@@ -60,6 +61,7 @@
         .content-section { display: none; padding-bottom: 2rem; }
         .content-section.active { display: block; }
 
+        /* OS Slider Styling */
         .os-group { margin-top: 2rem; }
         .os-header {
             padding: 1rem 5%;
@@ -67,7 +69,6 @@
             align-items: center;
             gap: 15px;
         }
-
         .os-header img { width: 50px; height: 50px; object-fit: contain; }
         .os-header h2 { font-size: 1.8rem; }
 
@@ -76,8 +77,12 @@
             overflow-x: auto;
             gap: 20px;
             padding: 1rem 5%;
+            scroll-behavior: smooth;
         }
+        .slider-container::-webkit-scrollbar { height: 6px; }
+        .slider-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
 
+        /* Product Card */
         .product-card {
             min-width: 280px;
             border: 1px solid var(--border);
@@ -86,201 +91,214 @@
             background: white;
             transition: 0.3s;
         }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        
+        /* Updated to properly fit square 1500x1500 images:
+           - aspect-ratio keeps the image square and scales it to the card width
+           - object-fit: cover ensures center-cropping without distortion
+           - display:block prevents inline-gap issues
+           - max-height provides an upper bound so very wide cards don't become excessively tall
+           This works for modern browsers; if you need legacy support we can add a wrapper fallback. */
         .edition-img {
             width: 100%;
-            aspect-ratio: 1 / 1;
+            aspect-ratio: 1 / 1; /* keep square ratio for 1500x1500 images */
+            height: auto;
             object-fit: cover;
             background: #eee;
             display: block;
-            max-height: 400px;
+            max-height: 400px; /* optional limit to avoid overly tall cards on wide layouts */
         }
 
         .card-body { padding: 1.2rem; }
-
-        .price {
-            color: var(--accent);
-            font-weight: 800;
-            font-size: 1.3rem;
-            margin: 10px 0;
-        }
-
-        .actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .btn {
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-align: center;
-            cursor: pointer;
-            border: none;
-            text-decoration: none;
-        }
-
+        .price { color: var(--accent); font-weight: 800; font-size: 1.3rem; margin: 10px 0; }
+        
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn { padding: 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-align: center; cursor: pointer; border: none; text-decoration: none; }
         .btn-buy { background: var(--primary); color: white; }
         .btn-dl { background: #f0f0f0; color: #333; }
+
+        /* Office Grid (Standard Grid for Office) */
+        .office-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 2rem 5%; }
 
         #cart-bar {
             position: fixed;
             bottom: 0; left: 0; right: 0;
-            background: var(--dark);
-            color: white;
+            background: var(--dark); color: white;
             padding: 1.2rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transform: translateY(100%);
-            transition: 0.4s;
+            display: flex; justify-content: space-between; align-items: center;
+            transform: translateY(100%); transition: 0.4s; z-index: 1000;
         }
-
         #cart-bar.active { transform: translateY(0); }
     </style>
 </head>
 <body>
+    <nav>
+    <div class="logo">KEYVAULT <span style="font-weight: 300;">INDIA</span></div>
 
-<nav>
-    <div class="logo">KEYVAULT <span style="font-weight:300;">INDIA</span></div>
-    <div id="auth-area"></div>
-</nav>
-
-<div class="tabs-container">
-    <div class="tab-btn active" onclick="openTab(event, 'windows-tab')">
-        <i class="fab fa-windows"></i> Windows OS
-    </div>
-    <div class="tab-btn" onclick="openTab(event, 'office-tab')">
-        <i class="fas fa-file-word"></i> MS Office
-    </div>
-</div>
-
-<div id="windows-tab" class="content-section active">
-    <div id="windows-content"></div>
-</div>
-
-<div id="office-tab" class="content-section">
-    <div class="office-grid" id="off-grid"></div>
-</div>
-
-<div id="cart-bar">
-    <div>Total: <span id="total">₹0</span> (<span id="count">0</span> items)</div>
-    <button class="btn btn-buy" onclick="alert('Proceeding to Payment...')">Checkout Now</button>
-</div>
-
-<script>
-
-/* ================= AUTH SYSTEM ================= */
-
-function renderAuth() {
-    const username = localStorage.getItem("kv_username");
-    const container = document.getElementById("auth-area");
-
-    if (!username) {
-        container.innerHTML = `
-            <a href="login.html" class="btn btn-buy"
-               style="padding:8px 16px;font-size:0.9rem;">
-               Login
-            </a>
-        `;
-    } else {
-        const letter = username.charAt(0).toUpperCase();
-
-        container.innerHTML = `
-            <div onclick="logout()"
+    <div id="auth-area">
+        <a href="login.html" id="login-btn" class="btn btn-buy" style="padding:8px 16px; font-size:0.9rem;">Login</a>
+        
+        <div id="user-avatar" style="display:none; cursor:pointer;">
+            <div id="avatar-circle"
                 style="width:40px;height:40px;border-radius:50%;
-                background:#0078d4;color:white;
+                background:#0078d4;color:#fff;
                 display:flex;align-items:center;justify-content:center;
-                font-weight:700;cursor:pointer;">
-                ${letter}
+                font-weight:700;">
             </div>
-        `;
+        </div>
+    </div>
+</nav>
+    <div class="tabs-container">
+        <div class="tab-btn active" onclick="openTab(event, 'windows-tab')">
+            <i class="fab fa-windows"></i> Windows OS
+        </div>
+        <div class="tab-btn" onclick="openTab(event, 'office-tab')">
+            <i class="fas fa-file-word"></i> MS Office
+        </div>
+    </div>
+
+    <div id="windows-tab" class="content-section active">
+        <div id="windows-content"></div>
+    </div>
+
+    <div id="office-tab" class="content-section">
+        <div class="office-grid" id="off-grid"></div>
+    </div>
+
+    <div id="cart-bar">
+        <div>Total: <span id="total">₹0</span> (<span id="count">0</span> items)</div>
+        <button class="btn btn-buy" onclick="alert('Proceeding to Payment...')">Checkout Now</button>
+    </div>
+<script>
+function checkLogin() {
+    const username = localStorage.getItem("kv_username");
+
+    if (username) {
+        document.getElementById("login-btn").style.display = "none";
+        document.getElementById("user-avatar").style.display = "block";
+        document.getElementById("avatar-circle").innerText =
+            username.charAt(0).toUpperCase();
+    } else {
+        document.getElementById("login-btn").style.display = "inline-block";
+        document.getElementById("user-avatar").style.display = "none";
     }
 }
 
-function logout() {
-    localStorage.removeItem("kv_username");
-    location.reload();
-}
-
-renderAuth();
-
-/* ================= STORE SYSTEM ================= */
-
-const windowsData = [
-    {
-        os: "Windows 11",
-        icon: "https://img.icons8.com/color/144/windows-11.png",
-        editions: [
-            { id: 111, name: "Windows 11 Pro", price: 1899 },
-            { id: 112, name: "Windows 11 Home", price: 1499 }
-        ]
+document.getElementById("user-avatar").addEventListener("click", function () {
+    if (confirm("Logout?")) {
+        localStorage.removeItem("kv_username");
+        location.reload();
     }
-];
+});
 
-let cart = [];
-
-function openTab(evt, tabName) {
-    let content = document.getElementsByClassName("content-section");
-    for (let i = 0; i < content.length; i++) content[i].classList.remove("active");
-    let buttons = document.getElementsByClassName("tab-btn");
-    for (let i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
-    document.getElementById(tabName).classList.add("active");
-    evt.currentTarget.classList.add("active");
-}
-
-function init() {
-    const winContainer = document.getElementById('windows-content');
-    windowsData.forEach(group => {
-        let html = `
-            <div class="os-group">
-                <div class="os-header">
-                    <img src="${group.icon}">
-                    <h2>${group.os}</h2>
-                </div>
-                <div class="slider-container">
-        `;
-
-        group.editions.forEach(ed => {
-            html += `
-                <div class="product-card">
-                    <div class="card-body">
-                        <h3>${ed.name}</h3>
-                        <p class="price">₹${ed.price}</p>
-                        <div class="actions">
-                            <button class="btn btn-buy"
-                                onclick="addToCart(${ed.id}, '${ed.name}', ${ed.price})">
-                                Buy
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-
-        html += `</div></div>`;
-        winContainer.innerHTML += html;
-    });
-}
-
-function addToCart(id, name, price) {
-    cart.push({id, name, price});
-    const total = cart.reduce((s, i) => s + i.price, 0);
-    document.getElementById('count').innerText = cart.length;
-    document.getElementById('total').innerText = '₹' + total;
-    document.getElementById('cart-bar').classList.add('active');
-}
-
-init();
+checkLogin();
 
 </script>
+    
+    <script>
+        const windowsData = [
+            {
+                os: "Windows 11",
+                icon: "https://img.icons8.com/color/144/windows-11.png",
+                editions: [
+                    { id: 111, name: "Windows 11 Pro", price: 1899, img: "images/windows11pro.png?", dl: "https://www.microsoft.com/en-in/software-download/windows11" },
+                    { id: 112, name: "Windows 11 Home", price: 1499, img: "images/windows11home.png?w=400", dl: "https://www.microsoft.com/en-in/software-download/windows11" }
+                ]
+            },
+            {
+                os: "Windows 10",
+                icon: "https://img.icons8.com/color/144/windows-10--v1.png",
+                editions: [
+                    { id: 101, name: "Windows 10 Pro", price: 1499, img: "images/windows10pro.png?w=400", dl: "https://www.microsoft.com/en-in/software-download/windows10ISO" },
+                    { id: 102, name: "Windows 10 Home", price: 1199, img: "images/windows10home.png?w=400", dl: "https://www.microsoft.com/en-in/software-download/windows10ISO" }
+                ]
+            },
+            {
+                os: "Windows 7",
+                icon: "https://img.icons8.com/color/144/windows-7.png",
+                editions: [
+                    { id: 71, name: "Windows 7 Ultimate", price: 899, img: "images/windows7ultimate.png?w=400", dl: "https://archive.org/download/Microsoft-Windows-7-August-2018/7601.24214.180801-1700.win7sp1_ldr_escrow_CLIENT_ULTIMATE_x64FRE_en-us.iso" },
+                    { id: 72, name: "Windows 7 Professional", price: 699, img: "images/windows7pro.png?w=400", dl: "https://archive.org/download/Microsoft-Windows-7-August-2018/7601.24214.180801-1700.win7sp1_ldr_escrow_CLIENT_PROFESSIONAL_x64FRE_en-us.iso" }
+                ]
+            }
+        ];
 
+        const officeProducts = [
+            { id: 4, name: 'Office 2024 Pro Plus', price: 4599, img: 'https://img.icons8.com/color/144/microsoft-office-2019.png', dl: 'https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=ProPlus2024Retail&platform=x64&language=en-us&version=O16GA' },
+            { id: 5, name: 'Office 2021 Pro Plus', price: 3299, img: 'https://img.icons8.com/color/144/microsoft-office-2019.png', dl: 'https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=ProPlus2021Retail&platform=x64&language=en-us&version=O16GA' },
+            { id: 8, name: 'Microsoft 365 Pro Plus', price: 4899, img: 'https://upload.wikimedia.org/wikipedia/commons/0/0e/Microsoft_365_(2022).svg', dl: 'https://c2rsetup.officeapps.live.com/c2r/download.aspx?ProductreleaseID=O365ProPlusRetail&platform=x64&language=en-us&version=O16GA' }
+        ];
+
+        let cart = [];
+
+        function openTab(evt, tabName) {
+            let content = document.getElementsByClassName("content-section");
+            for (let i = 0; i < content.length; i++) content[i].classList.remove("active");
+            let buttons = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        function init() {
+            // Render Windows Sliders
+            const winContainer = document.getElementById('windows-content');
+            windowsData.forEach(group => {
+                let html = `
+                    <div class="os-group">
+                        <div class="os-header">
+                            <img src="${group.icon}" alt="${group.os}">
+                            <h2>${group.os}</h2>
+                        </div>
+                        <div class="slider-container">
+                `;
+                group.editions.forEach(ed => {
+                    html += `
+                        <div class="product-card">
+                            <img src="${ed.img}" class="edition-img">
+                            <div class="card-body">
+                                <h3>${ed.name}</h3>
+                                <p class="price">₹${ed.price.toLocaleString('en-IN')}</p>
+                                <div class="actions">
+                                    <button class="btn btn-buy" onclick="addToCart(${ed.id}, '${ed.name}', ${ed.price})">Buy License</button>
+                                    <a href="${ed.dl}" class="btn btn-dl">ISO File</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+                winContainer.innerHTML += html;
+            });
+
+            // Render Office Grid
+            const offGrid = document.getElementById('off-grid');
+            officeProducts.forEach(p => {
+                offGrid.innerHTML += `
+                    <div class="product-card">
+                        <div style="padding:20px; text-align:center;"><img src="${p.img}" style="width:80px"></div>
+                        <div class="card-body">
+                            <h3>${p.name}</h3>
+                            <p class="price">₹${p.price.toLocaleString('en-IN')}</p>
+                            <div class="actions">
+                                <button class="btn btn-buy" onclick="addToCart(${p.id}, '${p.name}', ${p.price})">Buy Now</button>
+                                <a href="${p.dl}" class="btn btn-dl">Setup</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addToCart(id, name, price) {
+            cart.push({id, name, price});
+            const total = cart.reduce((s, i) => s + i.price, 0);
+            document.getElementById('count').innerText = cart.length;
+            document.getElementById('total').innerText = '₹' + total.toLocaleString('en-IN');
+            document.getElementById('cart-bar').classList.add('active');
+        }
+
+        init();
+    </script>
 </body>
 </html>
