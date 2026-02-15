@@ -93,7 +93,22 @@
         }
         .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         
-        .edition-img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
+        /* Updated to properly fit square 1500x1500 images:
+           - aspect-ratio keeps the image square and scales it to the card width
+           - object-fit: cover ensures center-cropping without distortion
+           - display:block prevents inline-gap issues
+           - max-height provides an upper bound so very wide cards don't become excessively tall
+           This works for modern browsers; if you need legacy support we can add a wrapper fallback. */
+        .edition-img {
+            width: 100%;
+            aspect-ratio: 1 / 1; /* keep square ratio for 1500x1500 images */
+            height: auto;
+            object-fit: cover;
+            background: #eee;
+            display: block;
+            max-height: 400px; /* optional limit to avoid overly tall cards on wide layouts */
+        }
+
         .card-body { padding: 1.2rem; }
         .price { color: var(--accent); font-weight: 800; font-size: 1.3rem; margin: 10px 0; }
         
