@@ -1,0 +1,24 @@
+{
+  "keys": [
+    {
+      "id": 111,
+      "product": "Windows 11 Pro",
+      "key": "W11PRO-XXXXX-XXXXX-111"
+    },
+    {
+      "id": 112,
+      "product": "Windows 11 Home",
+      "key": "W11HOME-XXXXX-XXXXX-112"
+    },
+    {
+      "id": 101,
+      "product": "Windows 10 Pro",
+      "key": "W10PRO-XXXXX-XXXXX-101"
+    },
+    {
+      "id": 4,
+      "product": "Office 2024 Pro Plus",
+      "key": "OFF24-XXXXX-XXXXX-004"
+    }
+  ]
+}
