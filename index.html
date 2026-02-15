@@ -132,11 +132,22 @@
     </style>
 </head>
 <body>
-
     <nav>
-        <div class="logo">KEYVAULT <span style="font-weight: 300;">INDIA</span></div>
-    </nav>
+    <div class="logo">KEYVAULT <span style="font-weight: 300;">INDIA</span></div>
 
+    <div id="auth-area">
+        <a href="login.html" id="login-btn" class="btn btn-buy" style="padding:8px 16px; font-size:0.9rem;">Login</a>
+        
+        <div id="user-avatar" style="display:none; cursor:pointer;">
+            <div id="avatar-circle"
+                style="width:40px;height:40px;border-radius:50%;
+                background:#0078d4;color:#fff;
+                display:flex;align-items:center;justify-content:center;
+                font-weight:700;">
+            </div>
+        </div>
+    </div>
+</nav>
     <div class="tabs-container">
         <div class="tab-btn active" onclick="openTab(event, 'windows-tab')">
             <i class="fab fa-windows"></i> Windows OS
@@ -158,7 +169,27 @@
         <div>Total: <span id="total">₹0</span> (<span id="count">0</span> items)</div>
         <button class="btn btn-buy" onclick="alert('Proceeding to Payment...')">Checkout Now</button>
     </div>
+<script>
+function checkLogin() {
+    const user = JSON.parse(localStorage.getItem("kv_user"));
 
+    if (user) {
+        document.getElementById("login-btn").style.display = "none";
+        document.getElementById("user-avatar").style.display = "block";
+        document.getElementById("avatar-circle").innerText = user.name.charAt(0).toUpperCase();
+    }
+}
+
+document.getElementById("user-avatar").addEventListener("click", function() {
+    if (confirm("Logout?")) {
+        localStorage.removeItem("kv_user");
+        location.reload();
+    }
+});
+
+checkLogin();
+</script>
+    
     <script>
         const windowsData = [
             {
