@@ -336,12 +336,74 @@ function addToCart(id, name, price) {
     document.getElementById('cart-bar').classList.add('active');
 }
 
-function viewKey(productId) {
-    alert("Your Product Key for Product ID " + productId + " is: XXXXX-XXXXX-XXXXX");
+async function viewKey(productId) {
+
+    try {
+        const response = await fetch("product_keys.json");
+        const data = await response.json();
+
+        const product = data.keys.find(k => k.id === productId);
+
+        if (!product) {
+            alert("Product key not found.");
+            return;
+        }
+
+        document.getElementById("productName").innerText = product.product;
+        document.getElementById("productKey").innerText = product.key;
+        document.getElementById("keyModal").style.display = "flex";
+
+    } catch (error) {
+        alert("Could not load product key file.");
+    }
+}
+function closeModal() {
+    document.getElementById("keyModal").style.display = "none";
 }
 
 init();
 
     </script>
+    <!-- Product Key Modal -->
+<div id="keyModal" style="
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:rgba(0,0,0,0.6);
+align-items:center;
+justify-content:center;
+z-index:2000;
+">
+
+    <div style="
+    background:white;
+    width:350px;
+    padding:25px;
+    border-radius:12px;
+    text-align:center;
+    position:relative;
+    animation:fadeIn 0.3s ease;
+    ">
+
+        <h3 style="margin-bottom:15px;">Your Product Key</h3>
+
+        <div id="productName" style="font-weight:600;margin-bottom:10px;"></div>
+
+        <div id="productKey" style="
+            background:#f5f5f5;
+            padding:12px;
+            border-radius:6px;
+            font-weight:bold;
+            letter-spacing:1px;
+        "></div>
+
+        <button onclick="closeModal()" class="btn btn-buy"
+            style="margin-top:20px;width:100%;">
+            Close
+        </button>
+    </div>
+</div>
+    
 </body>
 </html>
