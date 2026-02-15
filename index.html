@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KeyVault India | Official Software Store</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        :root {
+            --primary: #0078d4;
+            --dark: #121212;
+            --light: #f8f9fa;
+            --accent: #28a745;
+            --border: #e0e0e0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: #fff; color: var(--dark); padding-bottom: 100px; }
+
+        nav {
+            background: #fff;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+
+        /* Restored Tab System */
+        .tabs-container {
+            display: flex;
+            justify-content: center;
+            background: #fff;
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .tab-btn {
+            padding: 1.5rem 3rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: #666;
+            transition: 0.3s;
+            border-bottom: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background: rgba(0, 120, 212, 0.05);
+        }
+
+        .content-section { display: none; padding-bottom: 2rem; }
+        .content-section.active { display: block; }
+
+        /* OS Slider Styling */
+        .os-group { margin-top: 2rem; }
+        .os-header {
+            padding: 1rem 5%;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .os-header img { width: 50px; height: 50px; object-fit: contain; }
+        .os-header h2 { font-size: 1.8rem; }
+
+        .slider-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 1rem 5%;
+            scroll-behavior: smooth;
+        }
+        .slider-container::-webkit-scrollbar { height: 6px; }
+        .slider-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
+
+        /* Product Card */
+        .product-card {
+            min-width: 280px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            transition: 0.3s;
+        }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        
+        .edition-img { width: 100%; height: 160px; object-fit: cover; background: #eee; }
+        .card-body { padding: 1.2rem; }
+        .price { color: var(--accent); font-weight: 800; font-size: 1.3rem; margin: 10px 0; }
+        
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .btn { padding: 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; text-align: center; cursor: pointer; border: none; text-decoration: none; }
+        .btn-buy { background: var(--primary); color: white; }
+        .btn-dl { background: #f0f0f0; color: #333; }
+
+        /* Office Grid (Standard Grid for Office) */
+        .office-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; padding: 2rem 5%; }
+
+        #cart-bar {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: var(--dark); color: white;
+            padding: 1.2rem 5%;
+            display: flex; justify-content: space-between; align-items: center;
+            transform: translateY(100%); transition: 0.4s; z-index: 1000;
+        }
+        #cart-bar.active { transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="logo">KEYVAULT <span style="font-weight: 300;">INDIA</span></div>
+    </nav>
+
+    <div class="tabs-container">
+        <div class="tab-btn active" onclick="openTab(event, 'windows-tab')">
+            <i class="fab fa-windows"></i> Windows OS
+        </div>
+        <div class="tab-btn" onclick="openTab(event, 'office-tab')">
+            <i class="fas fa-file-word"></i> MS Office
+        </div>
+    </div>
+
+    <div id="windows-tab" class="content-section active">
+        <div id="windows-content"></div>
+    </div>
+
+    <div id="office-tab" class="content-section">
+        <div class="office-grid" id="off-grid"></div>
+    </div>
+
+    <div id="cart-bar">
+        <div>Total: <span id="total">₹0</span> (<span id="count">0</span> items)</div>
+        <button class="btn btn-buy" onclick="alert('Proceeding to Payment...')">Checkout Now</button>
+    </div>
+
+    <script>
+        const windowsData = [
+            {
+                os: "Windows 11",
+                icon: "https://img.icons8.com/color/144/windows-11.png",
+                editions: [
+                    { id: 111, name: "Windows 11 Pro", price: 1899, img: "images/windows11pro.png?w=400", dl: "#" },
+                    { id: 112, name: "Windows 11 Home", price: 1499, img: "images/windows11home.png?w=400", dl: "#" },
+                    { id: 113, name: "Windows 11 Enterprise", price: 3499, img: "images/windows11enterprise.png?w=400", dl: "#" }
+                ]
+            },
+            {
+                os: "Windows 10",
+                icon: "https://img.icons8.com/color/144/windows-10--v1.png",
+                editions: [
+                    { id: 101, name: "Windows 10 Pro", price: 1499, img: "images/windows10pro.png?w=400", dl: "#" },
+                    { id: 102, name: "Windows 10 Home", price: 1199, img: "images/windows10home.png?w=400", dl: "#" }
+                ]
+            },
+            {
+                os: "Windows 7",
+                icon: "https://img.icons8.com/color/144/windows-7.png",
+                editions: [
+                    { id: 71, name: "Windows 7 Ultimate", price: 899, img: "https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?w=400", dl: "#" },
+                    { id: 72, name: "Windows 7 Professional", price: 699, img: "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400", dl: "#" }
+                ]
+            }
+        ];
+
+        const officeProducts = [
+            { id: 4, name: 'Office 2024 Pro Plus', price: 4599, img: 'https://img.icons8.com/color/144/microsoft-office-2019.png', dl: '#' },
+            { id: 5, name: 'Office 2021 Pro Plus', price: 3299, img: 'https://img.icons8.com/color/144/microsoft-office-2019.png', dl: '#' },
+            { id: 8, name: 'Microsoft 365 Personal', price: 4899, img: 'https://img.icons8.com/color/144/office-365.png', dl: '#' }
+        ];
+
+        let cart = [];
+
+        function openTab(evt, tabName) {
+            let content = document.getElementsByClassName("content-section");
+            for (let i = 0; i < content.length; i++) content[i].classList.remove("active");
+            let buttons = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < buttons.length; i++) buttons[i].classList.remove("active");
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        function init() {
+            // Render Windows Sliders
+            const winContainer = document.getElementById('windows-content');
+            windowsData.forEach(group => {
+                let html = `
+                    <div class="os-group">
+                        <div class="os-header">
+                            <img src="${group.icon}" alt="${group.os}">
+                            <h2>${group.os}</h2>
+                        </div>
+                        <div class="slider-container">
+                `;
+                group.editions.forEach(ed => {
+                    html += `
+                        <div class="product-card">
+                            <img src="${ed.img}" class="edition-img">
+                            <div class="card-body">
+                                <h3>${ed.name}</h3>
+                                <p class="price">₹${ed.price.toLocaleString('en-IN')}</p>
+                                <div class="actions">
+                                    <button class="btn btn-buy" onclick="addToCart(${ed.id}, '${ed.name}', ${ed.price})">Buy License</button>
+                                    <a href="${ed.dl}" class="btn btn-dl">ISO File</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += `</div></div>`;
+                winContainer.innerHTML += html;
+            });
+
+            // Render Office Grid
+            const offGrid = document.getElementById('off-grid');
+            officeProducts.forEach(p => {
+                offGrid.innerHTML += `
+                    <div class="product-card">
+                        <div style="padding:20px; text-align:center;"><img src="${p.img}" style="width:80px"></div>
+                        <div class="card-body">
+                            <h3>${p.name}</h3>
+                            <p class="price">₹${p.price.toLocaleString('en-IN')}</p>
+                            <div class="actions">
+                                <button class="btn btn-buy" onclick="addToCart(${p.id}, '${p.name}', ${p.price})">Buy Now</button>
+                                <a href="${p.dl}" class="btn btn-dl">Setup</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function addToCart(id, name, price) {
+            cart.push({id, name, price});
+            const total = cart.reduce((s, i) => s + i.price, 0);
+            document.getElementById('count').innerText = cart.length;
+            document.getElementById('total').innerText = '₹' + total.toLocaleString('en-IN');
+            document.getElementById('cart-bar').classList.add('active');
+        }
+
+        init();
+    </script>
+</body>
+</html>
